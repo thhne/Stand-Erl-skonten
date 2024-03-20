@@ -1,0 +1,24 @@
+SELECT 
+`invoice`.`account`, 
+`creditaccountid`, 
+`creditaccount`.`name`,
+`invoicedate` AS `Rechnungsdatum` ,
+-- `period`, 
+DATE_FORMAT(`period`,'%b %Y') AS `Beschäftigungsmonat`, 
+SUM(`quantity`*`price`) AS `Summe` ,
+`pr`.`projecttypeid`,
+`pt`.`name` AS `projecttype`,
+`pr`.`projectid`,
+`pr`.`projectname`
+FROM `invoice` 
+INNER JOIN `invoice_item` USING(`account`,`invoiceid`) 
+INNER JOIN `creditaccount` USING(`creditaccountid`)
+LEFT JOIN `event` `e` USING(`eventid`,`eventdb`)
+LEFT JOIN `project` `pr` ON (`pr`.`projectid`,`pr`.`projectdb`) = (`e`.`projectid`,`e`.`projectdb`)
+LEFT JOIN `projecttype` `pt` ON `pt`.`projecttypeid` = `pr`.`projecttypeid` 
+WHERE
+`invoicedate` >'2021-12-31'
+AND `account` IN('CB', 'CH', 'CK', 'CL', 'CY') 
+GROUP BY 
+`creditaccountid`,
+`invoicedate`
